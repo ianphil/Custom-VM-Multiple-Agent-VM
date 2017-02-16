@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "ApplianceDeployment", "ApplianceDeployment\ApplianceDeployment.deployproj", "{9B9FDC81-40D4-4288-B874-7A65D944049A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9B9FDC81-40D4-4288-B874-7A65D944049A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B9FDC81-40D4-4288-B874-7A65D944049A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B9FDC81-40D4-4288-B874-7A65D944049A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B9FDC81-40D4-4288-B874-7A65D944049A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,310 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "agentvmStorageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    "agentvmName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agentvmAdminUserName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agentvmAdminPassword": {
+      "type": "securestring"
+    },
+    "agentvmCount": {
+      "type": "int",
+      "defaultValue": 1,
+      "allowedValues": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "metadata": {
+        "description": "Number of VMs to deploy (2-10)"
+      }
+    },
+    "appliancevmName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "appliancevmAdminUserName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "appliancevmAdminPassword": {
+      "type": "securestring"
+    },
+    "appliancevmImageName": {
+      "type": "string"
+    },
+    "appliancevmBootScriptURI": {
+        "type": "string"
+    },
+    "appliancevmBootCommand": {
+      "type": "securestring"
+    },
+    "appliancevmStorageKey": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "agentvmName": "[concat('agentvm', uniqueString(resourceGroup().id))]",
+    "devtestPrefix": "10.0.0.0/16",
+    "devtestSubnet1Name": "Subnet-1",
+    "devtestSubnet1Prefix": "10.0.0.0/24",
+    "agentvmImagePublisher": "OpenLogic",
+    "agentvmImageOffer": "CentOS",
+    "agentvmImageSKU": "6.7",
+    "agentvmOSDiskName": "agentvmOSDisk",
+    "agentvmVmSize": "Standard_D2_v2",
+    "agentvmVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'devtest')]",
+    "agentvmSubnetRef": "[concat(variables('agentvmVnetID'), '/subnets/', variables('devtestSubnet1Name'))]",
+    "agentvmStorageAccountContainerName": "vhds",
+    "agentvmNicName": "[concat(parameters('agentvmName'), 'NetworkInterface')]",
+    "appliancevmImagePublisher": "Canonical",
+    "appliancevmImageOffer": "UbuntuServer",
+    "appliancevmOSDiskName": "appliancevmOSDisk",
+    "appliancevmVmSize": "Standard_D2_v2",
+    "appliancevmVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'devtest')]",
+    "appliancevmSubnetRef": "[concat(variables('appliancevmVnetID'), '/subnets/', variables('devtestSubnet1Name'))]",
+    "appliancevmStorageAccountContainerName": "vhds",
+    "appliancevmNicName": "[concat(parameters('appliancevmName'), 'NetworkInterface')]",
+    "appliancevmStorageName": "",
+    "appliancevmContainerName": ""
+  },
+  "resources": [
+      {
+          "name": "[variables('agentvmName')]",
+          "type": "Microsoft.Storage/storageAccounts",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [ ],
+          "tags": {
+              "displayName": "agentvm"
+          },
+        "properties": {
+          "accountType": "[parameters('agentvmStorageType')]"
+        }
+      },
+      {
+          "name": "devtest",
+          "type": "Microsoft.Network/virtualNetworks",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2016-03-30",
+          "dependsOn": [ ],
+          "tags": {
+              "displayName": "devtest"
+          },
+          "properties": {
+              "addressSpace": {
+                  "addressPrefixes": [
+                      "[variables('devtestPrefix')]"
+                  ]
+              },
+              "subnets": [
+                  {
+                      "name": "[variables('devtestSubnet1Name')]",
+                      "properties": {
+                          "addressPrefix": "[variables('devtestSubnet1Prefix')]"
+                      }
+                  }
+              ]
+          }
+      },
+      {
+          "name": "[concat(variables('agentvmNicName'), copyIndex())]",
+          "type": "Microsoft.Network/networkInterfaces",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2016-03-30",
+          "copy": {
+            "count": "[parameters('agentvmCount')]",
+            "name": "nicloop"
+          }, 
+          "dependsOn": [
+              "[resourceId('Microsoft.Network/virtualNetworks', 'devtest')]"
+          ],
+        "tags": {
+          "displayName": "[concat(variables('agentvmNicName'), copyIndex())]"
+        },
+          "properties": {
+              "ipConfigurations": [
+                  {
+                      "name": "ipconfig1",
+                      "properties": {
+                          "privateIPAllocationMethod": "Dynamic",
+                          "subnet": {
+                              "id": "[variables('agentvmSubnetRef')]"
+                          }
+                      }
+                  }
+              ]
+          }
+      },
+      {
+      "name": "[concat(parameters('agentvmName'), copyIndex())]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "copy": {
+        "count": "[parameters('agentvmCount')]",
+        "name": "vmloop"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('agentvmName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('agentvmNicName'), copyIndex()))]"
+      ],
+      "tags": {
+        "displayName": "agentvm"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('agentvmVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[concat(parameters('agentvmName'), copyIndex())]",
+          "adminUsername": "[parameters('agentvmAdminUsername')]",
+          "adminPassword": "[parameters('agentvmAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('agentvmImagePublisher')]",
+            "offer": "[variables('agentvmImageOffer')]",
+            "sku": "[variables('agentvmImageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "agentvmOSDisk",
+            "vhd": {
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', concat(parameters('agentvmName'), copyIndex())), '2016-01-01').primaryEndpoints.blob, variables('agentvmStorageAccountContainerName'), '/', variables('agentvmOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('agentvmNicName'))]"
+            }
+          ]
+        }
+      },
+        "resources": [
+            {
+                "name": "bootstrap",
+                "type": "extensions",
+                "location": "[resourceGroup().location]",
+                "apiVersion": "2016-03-30",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Compute/virtualMachines', concat(parameters('agentvmName'), copyIndex()))]"
+                ],
+                "tags": {
+                    "displayName": "bootstrap"
+                },
+                "properties": {
+                    "publisher": "Microsoft.OSTCExtensions",
+                    "type": "CustomScriptForLinux",
+                    "typeHandlerVersion": "1.4",
+                    "autoUpgradeMinorVersion": true,
+                  "settings": {
+                    "fileUris": [
+                      "[parameters('appliancevmBootScriptURI')]"
+                    ],
+                    "commandToExecute": "[parameters('appliancevmBootCommand')]",
+                    "storageAccountName": "[variables('appliancevmStorageName')]",
+                    "storageAccountKey": "[parameters('appliancevmStorageKey')]"
+                  }
+                }
+            }
+        ]
+    },
+      {
+          "name": "[variables('appliancevmNicName')]",
+          "type": "Microsoft.Network/networkInterfaces",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2016-03-30",
+          "dependsOn": [
+              "[resourceId('Microsoft.Network/virtualNetworks', 'devtest')]"
+          ],
+          "tags": {
+              "displayName": "appliancevmNic"
+          },
+          "properties": {
+              "ipConfigurations": [
+                  {
+                      "name": "ipconfig1",
+                      "properties": {
+                          "privateIPAllocationMethod": "Dynamic",
+                          "subnet": {
+                              "id": "[variables('appliancevmSubnetRef')]"
+                          }
+                      }
+                  }
+              ]
+          }
+      },
+      {
+          "name": "[parameters('appliancevmName')]",
+          "type": "Microsoft.Compute/virtualMachines",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+              "[resourceId('Microsoft.Network/networkInterfaces', variables('appliancevmNicName'))]"
+          ],
+          "tags": {
+              "displayName": "appliancevm"
+          },
+          "properties": {
+              "hardwareProfile": {
+                  "vmSize": "[variables('appliancevmVmSize')]"
+              },
+              "osProfile": {
+                  "computerName": "[parameters('appliancevmName')]",
+                  "adminUsername": "[parameters('appliancevmAdminUsername')]",
+                  "adminPassword": "[parameters('appliancevmAdminPassword')]"
+              },
+            "storageProfile": {
+              "osDisk": {
+                "name": "[concat(parameters('appliancevmName'),'-osdisk')]",
+                "osType": "linux",
+                "createOption": "FromImage",
+                "caching": "ReadWrite",
+                "image": {
+                  "uri": "[concat('http://', variables('appliancevmStorageName'), '.blob.core.windows.net/',variables('appliancevmContainerName'),'/',parameters('appliancevmImageName'))]"
+                },
+                "vhd": {
+                  "uri": "[concat('http://', variables('appliancevmStorageName'), '.blob.core.windows.net/',variables('appliancevmContainerName'),'/', parameters('appliancevmName'),'-osdisk.vhd')]"
+                }
+              }
+            },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('appliancevmNicName'))]"
+                      }
+                  ]
+              }
+          }
+      }],
+  "outputs": {}
+}
