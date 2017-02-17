@@ -58,12 +58,18 @@
       "type": "string"
     },
     "appliancevmBootScriptURI": {
-        "type": "string"
+      "type": "string"
     },
     "appliancevmBootCommand": {
       "type": "securestring"
     },
     "appliancevmStorageKey": {
+      "type": "string"
+    },
+    "appliancevmStorageName": {
+      "type": "string"
+    },
+    "appliancevmContainerName": {
       "type": "string"
     }
   },
@@ -88,9 +94,7 @@
     "appliancevmVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'devtest')]",
     "appliancevmSubnetRef": "[concat(variables('appliancevmVnetID'), '/subnets/', variables('devtestSubnet1Name'))]",
     "appliancevmStorageAccountContainerName": "vhds",
-    "appliancevmNicName": "[concat(parameters('appliancevmName'), 'NetworkInterface')]",
-    "appliancevmStorageName": "",
-    "appliancevmContainerName": ""
+    "appliancevmNicName": "[concat(parameters('appliancevmName'), 'NetworkInterface')]"
   },
   "resources": [
       {
@@ -231,7 +235,7 @@
                       "[parameters('appliancevmBootScriptURI')]"
                     ],
                     "commandToExecute": "[parameters('appliancevmBootCommand')]",
-                    "storageAccountName": "[variables('appliancevmStorageName')]",
+                    "storageAccountName": "[parameters('appliancevmStorageName')]",
                     "storageAccountKey": "[parameters('appliancevmStorageKey')]"
                   }
                 }
@@ -290,10 +294,10 @@
                 "createOption": "FromImage",
                 "caching": "ReadWrite",
                 "image": {
-                  "uri": "[concat('http://', variables('appliancevmStorageName'), '.blob.core.windows.net/',variables('appliancevmContainerName'),'/',parameters('appliancevmImageName'))]"
+                  "uri": "[concat('http://', parameters('appliancevmStorageName'), '.blob.core.windows.net/',variables('appliancevmContainerName'),'/',parameters('appliancevmImageName'))]"
                 },
                 "vhd": {
-                  "uri": "[concat('http://', variables('appliancevmStorageName'), '.blob.core.windows.net/',variables('appliancevmContainerName'),'/', parameters('appliancevmName'),'-osdisk.vhd')]"
+                  "uri": "[concat('http://', parameters('appliancevmStorageName'), '.blob.core.windows.net/',variables('appliancevmContainerName'),'/', parameters('appliancevmName'),'-osdisk.vhd')]"
                 }
               }
             },

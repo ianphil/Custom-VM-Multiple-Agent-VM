@@ -11,6 +11,8 @@
     "appliancevmImageName": { "value": "appliancevmImage.vhd" },
     "appliancevmBootScriptURI": { "value": "https://path-to-sh" },
     "appliancevmBootCommand": { "value": "bootstrap.sh variable" },
-    "appliancevmStorageKey": { "value": "key_value" }
+    "appliancevmStorageKey": { "value": "key_value" },
+    "appliancevmStorageName": { "value": "storage_account" },
+    "appliancevmContainerName": { "value": "vhd_container" }
   }
 }
