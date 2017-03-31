@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "masterDnsNamePrefix": {
+            "value": "devnexus001"
+        },
+        "agentDnsNamePrefix": {
+            "value": "devnexus001-agent"
+        },
+        "agentCount": {
+            "value": 3
+        },
+        "agentVMSize": {
+            "value": "Standard_DS2"
+        },
+        "linuxAdminUsername": {
+            "value": "tdr"
+        },
+        "orchestratorType": {
+            "value": "Swarm"
+        },
+        "masterCount": {
+            "value": 1
+        },
+        "sshRSAPublicKey": {
+            "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDjQAcdFw8soW40xs5Xh+QMGuNtYYh8U6Zg/cx4NlR+/dfS0hhyTy0c4n9lrSamoXKTQm4J9apw7M0xZeKMCZtk57ldCtmJ3pdmQyF7FgHtX0XutewmD4l4GgH1M8IN/E7Gky6aBunPj7P4EYXct7g3wmrtIz/qjdd7y7f8/pJJQY8xXFoxLol0XBGpjbuUdO/0g0HjJMOvk0ZJonFSJ4kyNvNVuhilmo0u+uPg2PnNmgYmATB3l02mnaeBktSydaYI3sv60TIM85PUFbvcmGB8CPP4GfpiB7szVL0XHbyYjZ+ezrB4aRVAD47sp/cbCs9IonW8A/DxYKXqg8tRNHzHQhVSP/O6sWdg+iFgEdA/Fof9Eje98DWu86BlRTNyeJnBqN3J7+ETMfeoRVRds+8oc8Ns4fsM7rvMCacXunfo8d/kwN6aF/Bk3AdjR9u1SS0A/L9IaRYbun30ghDuN2jKAo4R2stLtTvq8OkHvehHW411Pkjmajqm+ygMxIcn7fEb3xdRPjpRmTxgs9ioDNJzJlhRs6TXkuMjo4Ry6thMSM65iBHJaSjoEUBg0SHi+f19ar/yGL48dd+M79Ci4yWCpXDdrNEDQdn6076OP1vrv9G6wM6qAwObH11MoZIbCKnKFuVDZUjbDLyiJYnQ9BpvGyeTmbT3ORCak099nxYdVQ=="
+        },
+        "enableDiagnostics": {
+            "value": false
+        }
+    }
+}
